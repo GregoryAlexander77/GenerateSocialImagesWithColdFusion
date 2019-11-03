@@ -1,5 +1,18 @@
 <cfcomponent displayname="Image" hint="Cfc to convert ColdFusion objects into proper json objects." name="cfJson">
 	
+	<!---
+	More information can be found at: https://gregoryalexander.com/blog/2019/11/1/How-to-make-the-perfect-social-media-sharing-image--part-3-Using-ColdFusion-to-generate-the-image-
+
+	Example Usage:
+			
+	<cfset socialMediaImagePath = "D:\home\gregoryalexander.com\wwwroot\blog\enclosures\aspectRatio1.jpg">
+
+	<cfset createSocialMediaImages(socialMediaImagePath, 'facebook', '')>
+	<cfset createSocialMediaImages(socialMediaImagePath, 'twitter', '')>
+	<cfset createSocialMediaImages(socialMediaImagePath, 'instagram', '')>
+	<cfset createSocialMediaImages(socialMediaImagePath, 'linkedIn', '')>
+	--->
+	
 	<cffunction name="getImageInfo" access="public" output="false" returntype="struct" hint="Provides information about an image using the built in ColdFusion cfimage function.">
     	<cfargument name="imageUrl" type="string" required="yes" hint="provide the full path to the image.">
 		
@@ -69,7 +82,7 @@
 		<!--- Read the image to determine how to scale it --->
 		<cfimage 
 			action = "info"
-			source = "#socialMediaImagePath#"
+			source = "#imagePath#"
 			structname="imageInfo">
 			
 		<cfif debug>Original image width: <cfoutput>#imageInfo.width# height: #imageInfo.height#</cfoutput><br/></cfif>
@@ -221,18 +234,18 @@
 		<cfif preCrop>
 
 			<!--- Create a new image --->
-			<cfset shareImage = imageNew(socialMediaImagePath)>
+			<cfset shareImage = imageNew(imagePath)>
 					
-			<!--- Handle smasll images. --->
+			<!--- Handle small images. --->
 			<!--- This logic is only invoked for Facebook rectangle links. --->
 			<cfif socialMediaImageType eq 'facebookLinkRectangleImage'>
 				
 				<!--- Resize the new image. For portrait images, we are going to resize the image to 550 pixels wide. --->
 				<cfset imageResize(shareImage, 550, '')>
-				<!--- We know the width of the new image that was just created (550), now get it's width --->
-				<cfset shareImageWidth = imageGetHeight(shareImage)>
+				<!--- We know the width of the new image that was just created (550), now get it's height --->
+				<cfset shareImageHeight = imageGetHeight(shareImage)>
 				<!--- Crop the resized image from the center (centerCrop(path/image, originalWidth, originalHeight, newWidth, newHeight). We don't need to determine an aspect ratio. It is a square. --->
-				<cfset shareImage = centerCrop(shareImage, 550, shareImageWidth, thisImageWidth, thisImageHeight)>
+				<cfset shareImage = centerCrop(shareImage, 550, shareImageHeight, thisImageWidth, thisImageHeight)>
 			
 			<cfelse><!---<cfif (socialMediaImageType eq 'facebookLinkRectangleImage'>--->
 				
@@ -257,21 +270,21 @@
 				<!--- We are going to resize the new image to the precrop size and then crop it again. I want extra space to make sure that it fits our target size. We are putting in a blank argument for the height in order to keep the aspect ratio of the original image. --->
 				<cfset imageResize(shareImage, preCropSize, '')>
 				<!--- We know the width of the new image that was just created (250), now get it's height --->
-				<cfset shareImageWidth = imageGetHeight(shareImage)>
+				<cfset shareImageHeight = imageGetHeight(shareImage)>
 				<!--- Crop the resized image from the center (centerCrop(path/image, originalWidth, originalHeight, newWidth, newHeight). We don't need to determine an aspect ratio. It is a square. --->
-				<cfset shareImage = centerCrop(shareImage, preCropSize, shareImageWidth, thisImageWidth, thisImageHeight)>
+				<cfset shareImage = centerCrop(shareImage, preCropSize, shareImageHeight, thisImageWidth, thisImageHeight)>
 				
 			</cfif><!---<cfif (socialMediaImageType eq 'facebookLinkRectangleImage'>--->
 
 			<!--- Save the modified image to a file. --->
-			<cfimage source="#shareImage#" action="write" destination="#getSocialMediaDestination(socialMediaImagePath, arguments.socialMediaPlatform)#" overwrite="yes">
+			<cfimage source="#shareImage#" action="write" destination="#getSocialMediaDestination(imagePath, arguments.socialMediaPlatform)#" overwrite="yes">
 			
-			<cfif debug><cfoutput>#getSocialMediaDestination(socialMediaImagePath, arguments.socialMediaPlatform)#</cfoutput></cfif>
+			<cfif debug><cfoutput>#getSocialMediaDestination(imagePath, arguments.socialMediaPlatform)#</cfoutput></cfif>
 			
 		<cfelse><!---<cfif socialMediaImageType contain 'link'>--->
 			
 			<!--- Handle landscape images. --->
-			<cfif getImageOrientation(socialMediaImagePath) eq 'landscape'>
+			<cfif getImageOrientation(imagePath) eq 'landscape'>
 
 				<!--- Determine the new width --->
 				<cfif imageInfo.width gte thisImageWidth>
@@ -284,13 +297,13 @@
 				<cfset newHeight = ratioCalculator(thisImageWidth, thisImageHeight, newWidth)>
 
 				<!--- Create a new image --->
-				<cfset facebookShareImage = imageNew(socialMediaImagePath)>
+				<cfset facebookShareImage = imageNew(imagePath)>
 				<!--- Crop the image from the center (centerCrop(path, originalWidth, originalHeight, newWidth, newHeight)) --->
-				<cfset facebookShareImage = centerCrop(socialMediaImagePath, imageInfo.width, imageInfo.height, newWidth, newHeight)>
+				<cfset facebookShareImage = centerCrop(imagePath, imageInfo.width, imageInfo.height, newWidth, newHeight)>
 				<!--- Save the modified image to a file. --->
-				<cfimage source="#facebookShareImage#" action="write" destination="#getSocialMediaDestination(socialMediaImagePath, arguments.socialMediaPlatform)#" overwrite="yes">
+				<cfimage source="#facebookShareImage#" action="write" destination="#getSocialMediaDestination(imagePath, arguments.socialMediaPlatform)#" overwrite="yes">
 				
-				<cfif debug><cfoutput>#getSocialMediaDestination(socialMediaImagePath, arguments.socialMediaPlatform)#</cfoutput></cfif>
+				<cfif debug><cfoutput>#getSocialMediaDestination(imagePath, arguments.socialMediaPlatform)#</cfoutput></cfif>
 
 			<cfelse>
 				<!--- Handle portrait images --->
@@ -305,11 +318,11 @@
 				<!--- Determine the new size of the images while preserving the aspect ratio of 1200 x 630. --->
 				<cfset newHeight = ratioCalculator(thisImageWidth, thisImageHeight, newWidth)>
 				<!--- Crop the top and bottom of the original image from the center (horizontalCrop(path, originalHeight, newHeight). --->
-				<cfset facebookShareImage = horizontalCrop(socialMediaImagePath, "#imageInfo.height#","#newHeight#")>
+				<cfset facebookShareImage = horizontalCrop(imagePath, "#imageInfo.height#","#newHeight#")>
 				<!--- Save the modified image to a file. --->
-				<cfimage source="#facebookShareImage#" action="write" destination="#getSocialMediaDestination(socialMediaImagePath, arguments.socialMediaPlatform)#" overwrite="yes">
+				<cfimage source="#facebookShareImage#" action="write" destination="#getSocialMediaDestination(imagePath, arguments.socialMediaPlatform)#" overwrite="yes">
 				
-				<cfif debug><cfoutput>#getSocialMediaDestination(socialMediaImagePath, arguments.socialMediaPlatform)#</cfoutput></cfif>
+				<cfif debug><cfoutput>#getSocialMediaDestination(imagePath, arguments.socialMediaPlatform)#</cfoutput></cfif>
 
 			</cfif>
 				
