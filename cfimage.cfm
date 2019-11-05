@@ -1,4 +1,18 @@
-<!---
+<!---facebookSharedImage, facebookLinkSquareImage, facebookLinkRectangleImage, twitterInstreamImage, twitterInstreamMinimumImage, instagramImage, instagramMinimumImage, linkedInImage, and linkedInMinimumImage.--->
+			
+<cfset socialMediaImagePath = "D:\home\gregorysblog.org\wwwroot\enclosures\DSC_0518.JPG">
+<!--- createSocialMediaImages(socialMediaImagePath, socialMediaImageType) --->	
+<cfset createSocialMediaImages(socialMediaImagePath, 'facebook', '')>
+<cfset createSocialMediaImages(socialMediaImagePath, 'twitter', '')>
+<!---<cfset createSocialMediaImages(socialMediaImagePath, 'instagram', '')>--->
+<!---<cfset createSocialMediaImages(socialMediaImagePath, 'linkedIn', '')>--->
+	
+<cfset enclosureUrl = application.rootUrl & "/enclosures/">
+<cfset enclosurePath = expandPath("/enclosures")>
+	
+<cfoutput>enclosurePath: #enclosurePath#</cfoutput>	
+
+	<!---
 	More information can be found at: https://gregoryalexander.com/blog/2019/11/1/How-to-make-the-perfect-social-media-sharing-image--part-3-Using-ColdFusion-to-generate-the-image-
 
 	Example Usage:
@@ -415,20 +429,6 @@
 		<cfreturn croppedImage>
 			
 	</cffunction>
-			
-<!---facebookSharedImage, facebookLinkSquareImage, facebookLinkRectangleImage, twitterInstreamImage, twitterInstreamMinimumImage, instagramImage, instagramMinimumImage, linkedInImage, and linkedInMinimumImage.--->
-			
-<cfset socialMediaImagePath = "D:\home\gregorysblog.org\wwwroot\enclosures\DSC_0518.JPG">
-<!--- createSocialMediaImages(socialMediaImagePath, socialMediaImageType) --->	
-<cfset createSocialMediaImages(socialMediaImagePath, 'facebook', '')>
-<cfset createSocialMediaImages(socialMediaImagePath, 'twitter', '')>
-<!---<cfset createSocialMediaImages(socialMediaImagePath, 'instagram', '')>--->
-<!---<cfset createSocialMediaImages(socialMediaImagePath, 'linkedIn', '')>--->
-	
-<cfset enclosureUrl = application.rootUrl & "/enclosures/">
-<cfset enclosurePath = expandPath("/enclosures")>
-	
-<cfoutput>enclosurePath: #enclosurePath#</cfoutput>
 
 
 	
